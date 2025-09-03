@@ -20,10 +20,17 @@
       --win-border:#34d399;
       --danger:#b91c1c;
       --success:#065f46;
-      --table-bg:#f5f5f5; /* light grey for table */
+      --table-bg:#f5f5f5;   /* light grey for table */
+      --panel-bg:#f5f5f5;   /* light grey for main form */
       --radius-lg:16px;
       --radius-md:12px;
       --radius-sm:10px;
+
+      /* yes/no button colors */
+      --yes:#16a34a;        /* green */
+      --yes-hover:#15803d;  /* darker green */
+      --no:#ef4444;         /* red */
+      --no-hover:#dc2626;   /* darker red */
     }
 
     /* Base */
@@ -41,6 +48,7 @@
       padding:20px;
       border:1px solid var(--border);
       border-radius:var(--radius-lg);
+      background:var(--panel-bg); /* light grey form background */
     }
 
     /* Headings */
@@ -79,7 +87,7 @@
       background:#fff;
     }
 
-    /* Buttons: ALL buttons unified */
+    /* Buttons: brand default */
     #rpe-calculator button{
       background-color:var(--brand-blue);
       color:#fff;
@@ -98,6 +106,12 @@
       opacity:.6;
       cursor:not-allowed;
     }
+
+    /* Yes/No overrides */
+    #btnYes{ background:var(--yes); }
+    #btnYes:hover{ background:var(--yes-hover); }
+    #btnNo{ background:var(--no); }
+    #btnNo:hover{ background:var(--no-hover); }
 
     /* Cards / boxes */
     .card{
@@ -131,6 +145,7 @@
     thead th{
       border-bottom:1px solid var(--border);
     }
+
     /* Win banner */
     #winBanner{
       display:none;
