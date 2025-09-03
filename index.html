@@ -6,7 +6,7 @@
   <title>Respiratory Protection Cost Checker</title>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Roboto:wght:400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -246,12 +246,8 @@
 
   <script>
   (function(){
-    // ====== CONFIG ======
-    // Point this to your webhook/endpoint (Zapier/Make/Wix backend).
-    // Leave "" to disable the network call (demo mode).
-    const EMAIL_WEBHOOK_URL = ""; // e.g., "https://hooks.zapier.com/hooks/catch/XXXX/XXXX"
+    const EMAIL_WEBHOOK_URL = ""; // optional webhook endpoint
 
-    // Shortcuts & formatters
     const $ = id => document.getElementById(id);
     const fmt0 = n => n.toLocaleString(undefined,{maximumFractionDigits:0});
     const money = n => n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -270,16 +266,14 @@
       return valid ? num : null;
     }
 
-    // Sanitize numeric input and validate
     ["input","blur"].forEach(evt => {
       $("inpPeople").addEventListener(evt, () => {
-        const cleaned = $("inpPeople").value.replace(/[^\\d]/g, "");
+        const cleaned = $("inpPeople").value.replace(/\D/g, "");
         if ($("inpPeople").value !== cleaned) $("inpPeople").value = cleaned;
         validatePeople();
       });
     });
 
-    // Step 1: Estimate
     $("btnEstimate").addEventListener("click", ()=>{
       const people = validatePeople();
       if (people === null) return;
@@ -295,7 +289,6 @@
       window.scrollTo({top: $("confirmBlock").offsetTop - 10, behavior: "smooth"});
     });
 
-    // Step 2: Confirm / custom
     $("btnNo").addEventListener("click", ()=>{
       $("inpCustomTotal").classList.remove("hidden");
       $("btnUseCustom").classList.remove("hidden");
@@ -315,7 +308,6 @@
       window.scrollTo({top: $("compareBlock").offsetTop - 10, behavior: "smooth"});
     }
 
-    // Step 3: Compare
     $("btnCompare").addEventListener("click", ()=>{
       const people = validatePeople();
       if(people === null || totalMasksForPeriod <= 0 || daysForPeriod <= 0) return;
@@ -324,8 +316,8 @@
       const pModlaMask = +$("priceModlaMask").value || 0;
       const pModlaFilter = +$("priceModlaFilter").value || 0;
 
-      const dispTotal  = pDisp * daysForPeriod * people;                         // U * D * N
-      const modlaTotal = (pModlaMask * people) + (pModlaFilter * daysForPeriod * people); // M*N + F*D*N
+      const dispTotal  = pDisp * daysForPeriod * people;
+      const modlaTotal = (pModlaMask * people) + (pModlaFilter * daysForPeriod * people);
 
       const rows = [
         ["Disposable masks", `$${money(pDisp)} × ${fmt0(daysForPeriod)} days × ${fmt0(people)} people`, dispTotal],
@@ -379,12 +371,11 @@
       $("results").classList.remove("hidden");
     });
 
-    // Lead capture sender
     $("btnSend").addEventListener("click", async ()=>{
       const email = $("leadEmail").value.trim();
       const msg = $("sendMsg");
       msg.style.color = "var(--muted)";
-      if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
         msg.style.color = "var(--danger)";
         msg.textContent = "Please enter a valid email address.";
         return;
@@ -419,7 +410,6 @@
       }
     });
 
-    // Initialize button state
     validatePeople();
   })();
   </script>
