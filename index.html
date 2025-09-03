@@ -1,271 +1,427 @@
-<div id="rpe-calculator" style="max-width:740px;margin:24px auto;padding:20px;border:1px solid #e5e7eb;border-radius:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;">
-  <h2 style="margin:0 0 12px;font-size:22px;">Respiratory Protection Cost Checker</h2>
-  <p style="margin:0 0 16px;color:#475569;">Estimate usage and compare costs based on your team size and timeframe.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Respiratory Protection Cost Checker</title>
 
-  <!-- Step 1: Inputs -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-    <label style="display:flex;flex-direction:column;gap:6px;">
-      <span>1) Number of people</span>
-      <input id="inpPeople" inputmode="numeric" pattern="[0-9]*" type="number" min="1" placeholder="e.g. 1000"
-             style="padding:10px;border:1px solid #cbd5e1;border-radius:10px;">
-      <small id="peopleError" style="display:none;color:#b91c1c;">Please enter a whole number of 1 or more.</small>
-    </label>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Roboto:wght:400;500&display=swap" rel="stylesheet">
 
-    <label style="display:flex;flex-direction:column;gap:6px;">
-      <span>2) Timeframe</span>
-      <select id="inpMonths" style="padding:10px;border:1px solid #cbd5e1;border-radius:10px;">
-        <option value="3">3 months (60 working days)</option>
-        <option value="6">6 months (120 working days)</option>
-        <option value="9">9 months (180 working days)</option>
-        <option value="12" selected>12 months (240 working days)</option>
-      </select>
-    </label>
-  </div>
+  <style>
+    :root{
+      --brand-blue:#1B58A3;
+      --brand-blue-hover:#1A6AFF;
+      --text:#000000;
+      --muted:#475569;
+      --border:#e5e7eb;
+      --input:#cbd5e1;
+      --win-bg:#ecfdf5;
+      --win-border:#34d399;
+      --danger:#b91c1c;
+      --success:#065f46;
+      --table-bg:#f5f5f5; /* light grey for table */
+      --radius-lg:16px;
+      --radius-md:12px;
+      --radius-sm:10px;
+    }
 
-  <button id="btnEstimate" style="margin:16px 0 0;padding:10px 14px;border:0;border-radius:10px;background:#111827;color:#fff;cursor:pointer;">Estimate total masks</button>
+    /* Base */
+    html,body{margin:0;padding:0;}
+    body{
+      font-family:'Roboto', Arial, sans-serif;
+      color:var(--text);
+      background:#fff;
+    }
 
-  <!-- Step 2: Confirmation -->
-  <div id="confirmBlock" style="display:none;margin-top:16px;padding:12px;border:1px dashed #cbd5e1;border-radius:10px;">
-    <div id="estText" style="margin-bottom:12px;font-weight:600;"></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button id="btnYes" style="padding:8px 12px;border:0;border-radius:8px;background:#16a34a;color:#fff;cursor:pointer;">Yes, looks right</button>
-      <button id="btnNo"  style="padding:8px 12px;border:0;border-radius:8px;background:#ef4444;color:#fff;cursor:pointer;">No, I’ll enter my own</button>
-      <input id="inpCustomTotal" type="number" min="0" placeholder="Enter total disposable masks for the period"
-             style="display:none;padding:8px;border:1px solid #cbd5e1;border-radius:8px;flex:1;">
-      <button id="btnUseCustom" style="display:none;padding:8px 12px;border:0;border-radius:8px;background:#111827;color:#fff;cursor:pointer;">Use this number</button>
+    /* Calculator container */
+    #rpe-calculator{
+      max-width:740px;
+      margin:24px auto;
+      padding:20px;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+    }
+
+    /* Headings */
+    #rpe-calculator h2,
+    #rpe-calculator h3{
+      font-family:'Poppins', sans-serif;
+      font-weight:700;
+      color:var(--brand-blue);
+      margin:0 0 12px;
+    }
+    #rpe-calculator h2{font-size:22px;}
+    #rpe-calculator h3{font-size:18px;}
+
+    /* Paragraph + small text */
+    #rpe-calculator p{margin:0 0 16px;color:var(--muted);}
+    #rpe-calculator small{color:var(--muted);}
+
+    /* Layout helpers */
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .stack{display:flex;flex-direction:column;gap:6px;}
+
+    /* Inputs */
+    input[type="number"],
+    input[type="email"],
+    select{
+      width:100%;
+      padding:10px;
+      border:1px solid var(--input);
+      border-radius:var(--radius-sm);
+      font:inherit;
+      box-sizing:border-box;
+      background:#fff;
+    }
+
+    /* Buttons: ALL buttons unified */
+    #rpe-calculator button{
+      background-color:var(--brand-blue);
+      color:#fff;
+      border:none;
+      border-radius:var(--radius-sm);
+      padding:10px 14px;
+      cursor:pointer;
+      font-family:'Roboto', sans-serif;
+      font-weight:500;
+      transition:background-color .2s ease;
+    }
+    #rpe-calculator button:hover{
+      background-color:var(--brand-blue-hover);
+    }
+    #rpe-calculator button:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    /* Cards / boxes */
+    .card{
+      border:1px solid var(--border);
+      border-radius:var(--radius-md);
+      padding:12px;
+      background:#fff;
+    }
+    .dashed{
+      border:1px dashed var(--input);
+      border-radius:var(--radius-sm);
+      padding:12px;
+    }
+
+    /* Messages */
+    .error{color:var(--danger);display:none;}
+    .success{color:var(--success);}
+
+    /* Table */
+    .table-wrap{overflow-x:auto;}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:var(--table-bg); /* light grey background */
+    }
+    th, td{
+      text-align:left;
+      padding:8px;
+      border-top:1px solid var(--border);
+    }
+    thead th{
+      border-bottom:1px solid var(--border);
+    }
+    /* Win banner */
+    #winBanner{
+      display:none;
+      background:var(--win-bg);
+      border:1px solid var(--win-border);
+      padding:12px;
+      border-radius:10px;
+      margin-bottom:12px;
+    }
+
+    /* Utility */
+    .hidden{display:none;}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  </style>
+</head>
+<body>
+
+  <div id="rpe-calculator">
+    <h2>Respiratory Protection Cost Checker</h2>
+    <p>Estimate usage and compare costs based on your team size and timeframe.</p>
+
+    <!-- Step 1: Inputs -->
+    <div class="grid-2">
+      <label class="stack">
+        <span>1) Number of people</span>
+        <input id="inpPeople" inputmode="numeric" pattern="[0-9]*" type="number" min="1" placeholder="e.g. 1000">
+        <small id="peopleError" class="error">Please enter a whole number of 1 or more.</small>
+      </label>
+
+      <label class="stack">
+        <span>2) Timeframe</span>
+        <select id="inpMonths">
+          <option value="3">3 months (60 working days)</option>
+          <option value="6">6 months (120 working days)</option>
+          <option value="9">9 months (180 working days)</option>
+          <option value="12" selected>12 months (240 working days)</option>
+        </select>
+      </label>
+    </div>
+
+    <button id="btnEstimate" style="margin-top:16px;">Estimate total masks</button>
+
+    <!-- Step 2: Confirmation -->
+    <div id="confirmBlock" class="dashed hidden" style="margin-top:16px;">
+      <div id="estText" style="margin-bottom:12px;font-weight:600;"></div>
+      <div class="row">
+        <button id="btnYes">Yes, looks right</button>
+        <button id="btnNo">No, I’ll enter my own</button>
+        <input id="inpCustomTotal" type="number" min="0" placeholder="Enter total disposable masks for the period" class="hidden" style="flex:1;min-width:260px;">
+        <button id="btnUseCustom" class="hidden">Use this number</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Price comparison -->
+    <div id="compareBlock" class="hidden" style="margin-top:18px;">
+      <h3>Price comparison (editable)</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <strong>Disposable Masks</strong>
+          <label style="display:block;margin-top:8px;font-size:14px;">Unit price ($)
+            <input id="priceDisp" type="number" step="0.01" value="1.00">
+          </label>
+        </div>
+
+        <div class="card">
+          <strong>Modla (Reusable + Filters)</strong>
+          <label style="display:block;margin-top:8px;font-size:14px;">Mask price ($)
+            <input id="priceModlaMask" type="number" step="0.01" value="7.00">
+          </label>
+          <label style="display:block;margin-top:8px;font-size:14px;">Filter price ($)
+            <input id="priceModlaFilter" type="number" step="0.01" value="0.35">
+          </label>
+        </div>
+      </div>
+
+      <button id="btnCompare" style="margin-top:14px;">Run comparison</button>
+
+      <div id="results" class="hidden card" style="margin-top:14px;">
+        <div id="winBanner">
+          <strong>🎉 Congratulations!! Big Savings uncovered!</strong>
+          <div id="winText" style="margin-top:6px;"></div>
+        </div>
+
+        <div id="summaryLine" style="font-weight:600;margin-bottom:10px;"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Formula</th>
+                <th>Total Cost ($)</th>
+                <th>Per-person ($)</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Lead capture -->
+        <div id="leadBlock" class="dashed" style="margin-top:16px;">
+          <label class="row">
+            <span style="font-weight:600;">Email me this estimate &amp; Modla’s volume-based pricing</span>
+            <input id="leadEmail" type="email" autocomplete="email" placeholder="you@company.com" style="flex:1;min-width:220px;">
+            <button id="btnSend">Send</button>
+          </label>
+          <small id="sendMsg" style="display:block;margin-top:8px;"></small>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Step 3: Price comparison -->
-  <div id="compareBlock" style="display:none;margin-top:18px;">
-    <h3 style="margin:0 0 8px;font-size:18px;">Price comparison (editable)</h3>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
-      <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;">
-        <strong>Disposable Masks</strong>
-        <label style="display:block;margin-top:8px;font-size:14px;">Unit price ($)
-          <input id="priceDisp" type="number" step="0.01" value="1.00" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
-        </label>
-      </div>
-      <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;">
-        <strong>Modla (Reusable + Filters)</strong>
-        <label style="display:block;margin-top:8px;font-size:14px;">Mask price ($)
-          <input id="priceModlaMask" type="number" step="0.01" value="7.00" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
-        </label>
-        <label style="display:block;margin-top:8px;font-size:14px;">Filter price ($)
-          <input id="priceModlaFilter" type="number" step="0.01" value="0.35" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px;">
-        </label>
-      </div>
-    </div>
+  <script>
+  (function(){
+    // ====== CONFIG ======
+    // Point this to your webhook/endpoint (Zapier/Make/Wix backend).
+    // Leave "" to disable the network call (demo mode).
+    const EMAIL_WEBHOOK_URL = ""; // e.g., "https://hooks.zapier.com/hooks/catch/XXXX/XXXX"
 
-    <button id="btnCompare" style="margin-top:14px;padding:10px 14px;border:0;border-radius:10px;background:#111827;color:#fff;cursor:pointer;">Run comparison</button>
+    // Shortcuts & formatters
+    const $ = id => document.getElementById(id);
+    const fmt0 = n => n.toLocaleString(undefined,{maximumFractionDigits:0});
+    const money = n => n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
-    <div id="results" style="display:none;margin-top:14px;border:1px solid #e5e7eb;border-radius:12px;padding:12px;">
-      <div id="winBanner" style="display:none;background:#ecfdf5;border:1px solid #34d399;padding:12px;border-radius:10px;margin-bottom:12px;">
-        <strong>🎉 Congratulations!! Big Savings uncovered!</strong>
-        <div id="winText" style="margin-top:6px;"></div>
-      </div>
-      <div id="summaryLine" style="font-weight:600;margin-bottom:10px;"></div>
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;">
-          <thead>
-            <tr style="text-align:left;">
-              <th style="border-bottom:1px solid #e5e7eb;padding:8px;">Option</th>
-              <th style="border-bottom:1px solid #e5e7eb;padding:8px;">Formula</th>
-              <th style="border-bottom:1px solid #e5e7eb;padding:8px;">Total Cost ($)</th>
-              <th style="border-bottom:1px solid #e5e7eb;padding:8px;">Per-person ($)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
+    const daysByMonths = { 3:60, 6:120, 9:180, 12:240 };
 
-      <!-- Lead capture -->
-      <div id="leadBlock" style="margin-top:16px;padding:12px;border:1px dashed #cbd5e1;border-radius:10px;">
-        <label style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <span style="font-weight:600;">Email me this estimate & Modla’s volume-based pricing</span>
-          <input id="leadEmail" type="email" autocomplete="email" placeholder="you@company.com"
-                 style="flex:1;min-width:220px;padding:10px;border:1px solid #cbd5e1;border-radius:10px;">
-          <button id="btnSend" style="padding:10px 14px;border:0;border-radius:10px;background:#111827;color:#fff;cursor:pointer;">Send</button>
-        </label>
-        <small id="sendMsg" style="display:block;margin-top:8px;color:#475569;"></small>
-      </div>
-    </div>
-  </div>
-</div>
+    let totalMasksForPeriod = 0;
+    let daysForPeriod = 0;
 
-<script>
-(function(){
-  // ====== CONFIG ======
-  // Point this to your webhook/endpoint (Zapier/Make/Wix backend). Leave "" to disable network call.
-  const EMAIL_WEBHOOK_URL = ""; // e.g., "https://hooks.zapier.com/hooks/catch/XXXX/XXXX"
+    function validatePeople() {
+      const raw = $("inpPeople").value.trim();
+      const num = Number(raw);
+      const valid = Number.isFinite(num) && raw !== "" && num >= 1 && Number.isInteger(num);
+      $("peopleError").style.display = valid ? "none" : "block";
+      $("btnEstimate").disabled = !valid;
+      return valid ? num : null;
+    }
 
-  const $ = id => document.getElementById(id);
-  const fmt0 = n => n.toLocaleString(undefined,{maximumFractionDigits:0});
-  const money = n => n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-
-  const daysByMonths = { 3:60, 6:120, 9:180, 12:240 };
-
-  let totalMasksForPeriod = 0;
-  let daysForPeriod = 0;
-
-  function validatePeople() {
-    const raw = $("inpPeople").value.trim();
-    const num = Number(raw);
-    const valid = Number.isFinite(num) && raw !== "" && num >= 1 && Number.isInteger(num);
-    $("peopleError").style.display = valid ? "none" : "block";
-    $("btnEstimate").disabled = !valid;
-    return valid ? num : null;
-  }
-
-  ["input","blur"].forEach(evt => {
-    $("inpPeople").addEventListener(evt, () => {
-      const cleaned = $("inpPeople").value.replace(/[^\d]/g, "");
-      if ($("inpPeople").value !== cleaned) $("inpPeople").value = cleaned;
-      validatePeople();
+    // Sanitize numeric input and validate
+    ["input","blur"].forEach(evt => {
+      $("inpPeople").addEventListener(evt, () => {
+        const cleaned = $("inpPeople").value.replace(/[^\\d]/g, "");
+        if ($("inpPeople").value !== cleaned) $("inpPeople").value = cleaned;
+        validatePeople();
+      });
     });
-  });
 
-  $("btnEstimate").addEventListener("click", ()=>{
-    const people = validatePeople();
-    if (people === null) return;
+    // Step 1: Estimate
+    $("btnEstimate").addEventListener("click", ()=>{
+      const people = validatePeople();
+      if (people === null) return;
 
-    const months = +$("inpMonths").value || 0;
-    daysForPeriod = daysByMonths[months] || 0;
+      const months = +$("inpMonths").value || 0;
+      daysForPeriod = daysByMonths[months] || 0;
 
-    totalMasksForPeriod = people * daysForPeriod;
+      totalMasksForPeriod = people * daysForPeriod;
 
-    $("confirmBlock").style.display = "block";
-    $("estText").textContent = `Based on ${fmt0(people)} people over ${months} month(s) (${fmt0(daysForPeriod)} working days), we estimate ${fmt0(totalMasksForPeriod)} disposable masks for this period. Does that look approximately correct?`;
-    window.scrollTo({top: $("confirmBlock").offsetTop - 10, behavior: "smooth"});
-  });
+      $("confirmBlock").classList.remove("hidden");
+      $("estText").textContent =
+        `Based on ${fmt0(people)} people over ${months} month(s) (${fmt0(daysForPeriod)} working days), we estimate ${fmt0(totalMasksForPeriod)} disposable masks for this period. Does that look approximately correct?`;
+      window.scrollTo({top: $("confirmBlock").offsetTop - 10, behavior: "smooth"});
+    });
 
-  $("btnNo").addEventListener("click", ()=>{
-    $("inpCustomTotal").style.display = "inline-block";
-    $("btnUseCustom").style.display = "inline-block";
-    $("inpCustomTotal").focus();
-  });
+    // Step 2: Confirm / custom
+    $("btnNo").addEventListener("click", ()=>{
+      $("inpCustomTotal").classList.remove("hidden");
+      $("btnUseCustom").classList.remove("hidden");
+      $("inpCustomTotal").focus();
+    });
 
-  $("btnUseCustom").addEventListener("click", ()=>{
-    const v = +$("inpCustomTotal").value || 0;
-    if(v > 0){ totalMasksForPeriod = v; showCompare(); }
-  });
+    $("btnUseCustom").addEventListener("click", ()=>{
+      const v = +$("inpCustomTotal").value || 0;
+      if(v > 0){ totalMasksForPeriod = v; showCompare(); }
+    });
 
-  $("btnYes").addEventListener("click", showCompare);
+    $("btnYes").addEventListener("click", showCompare);
 
-  function showCompare(){
-    $("compareBlock").style.display = "block";
-    $("results").style.display = "none";
-    window.scrollTo({top: $("compareBlock").offsetTop - 10, behavior: "smooth"});
-  }
-
-  $("btnCompare").addEventListener("click", ()=>{
-    const people = validatePeople();
-    if(people === null || totalMasksForPeriod <= 0 || daysForPeriod <= 0) return;
-
-    const pDisp = +$("priceDisp").value || 0;
-    const pModlaMask = +$("priceModlaMask").value || 0;
-    const pModlaFilter = +$("priceModlaFilter").value || 0;
-
-    // Totals
-    const dispTotal  = pDisp * daysForPeriod * people;                               // U * D * N
-    const modlaTotal = (pModlaMask * people) + (pModlaFilter * daysForPeriod * people); // M*N + F*D*N
-
-    // Table rows
-    const rows = [
-      ["Disposable masks", `$${money(pDisp)} × ${fmt0(daysForPeriod)} days × ${fmt0(people)} people`, dispTotal],
-      ["Modla (reusable + filters)", `($${money(pModlaMask)} × ${fmt0(people)} masks) + ($${money(pModlaFilter)} × ${fmt0(daysForPeriod)} days × ${fmt0(people)} people)`, modlaTotal]
-    ];
-
-    $("tbody").innerHTML = rows.map(([name,formula,total])=>{
-      const perPerson = total / people;
-      return `<tr>
-        <td style="border-top:1px solid #e5e7eb;padding:8px;">${name}</td>
-        <td style="border-top:1px solid #e5e7eb;padding:8px;">${formula}</td>
-        <td style="border-top:1px solid #e5e7eb;padding:8px;font-weight:600;">$${money(total)}</td>
-        <td style="border-top:1px solid #e5e7eb;padding:8px;">$${money(perPerson)}</td>
-      </tr>`;
-    }).join("");
-
-    // Summary & savings banner
-    const cheaper = modlaTotal < dispTotal ? "Modla" : "Disposable";
-    const savingsAbs = Math.abs(dispTotal - modlaTotal);
-    const savingsPct = dispTotal === 0 ? 0 : Math.abs((dispTotal - modlaTotal) / dispTotal) * 100;
-
-    $("summaryLine").textContent = `Estimated total for the selected period: ${fmt0(daysForPeriod)} working days. Lowest projected cost: ${cheaper}.`;
-
-    if (modlaTotal < dispTotal) {
-      $("winText").innerHTML = `By moving your respiratory protection procurement to <strong>Modla Technologies</strong>, you can reduce your spend by <strong>${money(savingsAbs)}</strong> (<strong>${savingsPct.toFixed(1)}%</strong>) for this period.`;
-      $("winBanner").style.display = "block";
-    } else {
-      $("winBanner").style.display = "none";
+    function showCompare(){
+      $("compareBlock").classList.remove("hidden");
+      $("results").classList.add("hidden");
+      window.scrollTo({top: $("compareBlock").offsetTop - 10, behavior: "smooth"});
     }
 
-    // Stash payload for lead capture
-    const payload = {
-      people,
-      months: +$("inpMonths").value,
-      working_days: daysForPeriod,
-      prices: {
-        disposable_unit: pDisp,
-        modla_mask: pModlaMask,
-        modla_filter: pModlaFilter
-      },
-      totals: {
-        disposable_total: +dispTotal.toFixed(2),
-        modla_total: +modlaTotal.toFixed(2),
-        savings_abs: +savingsAbs.toFixed(2),
-        savings_pct: +savingsPct.toFixed(1)
-      },
-      timestamp: new Date().toISOString()
-    };
-    $("leadBlock").dataset.payload = JSON.stringify(payload);
+    // Step 3: Compare
+    $("btnCompare").addEventListener("click", ()=>{
+      const people = validatePeople();
+      if(people === null || totalMasksForPeriod <= 0 || daysForPeriod <= 0) return;
 
-    $("results").style.display = "block";
-  });
+      const pDisp = +$("priceDisp").value || 0;
+      const pModlaMask = +$("priceModlaMask").value || 0;
+      const pModlaFilter = +$("priceModlaFilter").value || 0;
 
-  // Lead capture sender
-  $("btnSend").addEventListener("click", async ()=>{
-    const email = $("leadEmail").value.trim();
-    const msg = $("sendMsg");
-    msg.style.color = "#475569";
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-      msg.style.color = "#b91c1c";
-      msg.textContent = "Please enter a valid email address.";
-      return;
-    }
+      const dispTotal  = pDisp * daysForPeriod * people;                         // U * D * N
+      const modlaTotal = (pModlaMask * people) + (pModlaFilter * daysForPeriod * people); // M*N + F*D*N
 
-    const data = {
-      email,
-      source: "Pricing Calculator",
-      ...JSON.parse($("leadBlock").dataset.payload || "{}")
-    };
+      const rows = [
+        ["Disposable masks", `$${money(pDisp)} × ${fmt0(daysForPeriod)} days × ${fmt0(people)} people`, dispTotal],
+        ["Modla (reusable + filters)", `($${money(pModlaMask)} × ${fmt0(people)} masks) + ($${money(pModlaFilter)} × ${fmt0(daysForPeriod)} days × ${fmt0(people)} people)`, modlaTotal]
+      ];
 
-    // If webhook configured, POST it; else show a friendly fallback
-    if (EMAIL_WEBHOOK_URL) {
-      try {
-        const res = await fetch(EMAIL_WEBHOOK_URL, {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error("Network response was not ok");
-        msg.style.color = "#065f46";
-        msg.textContent = "Thanks! We’ve emailed your estimate and will follow up with volume pricing shortly.";
-        $("btnSend").disabled = true;
-      } catch (e) {
-        msg.style.color = "#b91c1c";
-        msg.textContent = "Hmm, couldn’t send just now. Please try again, or contact us at sales@modlappe.com.";
+      $("tbody").innerHTML = rows.map(([name,formula,total])=>{
+        const perPerson = total / people;
+        return `<tr>
+          <td>${name}</td>
+          <td>${formula}</td>
+          <td style="font-weight:600;">$${money(total)}</td>
+          <td>$${money(perPerson)}</td>
+        </tr>`;
+      }).join("");
+
+      const cheaper = modlaTotal < dispTotal ? "Modla" : "Disposable";
+      const savingsAbs = Math.abs(dispTotal - modlaTotal);
+      const savingsPct = dispTotal === 0 ? 0 : Math.abs((dispTotal - modlaTotal) / dispTotal) * 100;
+
+      $("summaryLine").textContent =
+        `Estimated total for the selected period: ${fmt0(daysForPeriod)} working days. Lowest projected cost: ${cheaper}.`;
+
+      if (modlaTotal < dispTotal) {
+        $("winText").innerHTML =
+          `By moving your respiratory protection procurement to <strong>Modla Technologies</strong>, you can reduce your spend by <strong>${money(savingsAbs)}</strong> (<strong>${savingsPct.toFixed(1)}%</strong>) for this period.`;
+        $("winBanner").style.display = "block";
+      } else {
+        $("winBanner").style.display = "none";
       }
-    } else {
-      // No endpoint yet—confirm capture locally
-      console.log("Lead payload (configure EMAIL_WEBHOOK_URL to send):", data);
-      msg.style.color = "#065f46";
-      msg.textContent = "Saved! (Demo mode) We’ll email your estimate & volume pricing soon.";
-      $("btnSend").disabled = true;
-    }
-  });
 
-  // Initialize button state
-  validatePeople();
-})();
-</script>
+      const payload = {
+        people,
+        months: +$("inpMonths").value,
+        working_days: daysForPeriod,
+        prices: {
+          disposable_unit: pDisp,
+          modla_mask: pModlaMask,
+          modla_filter: pModlaFilter
+        },
+        totals: {
+          disposable_total: +dispTotal.toFixed(2),
+          modla_total: +modlaTotal.toFixed(2),
+          savings_abs: +savingsAbs.toFixed(2),
+          savings_pct: +savingsPct.toFixed(1)
+        },
+        timestamp: new Date().toISOString()
+      };
+      $("leadBlock").dataset.payload = JSON.stringify(payload);
+
+      $("results").classList.remove("hidden");
+    });
+
+    // Lead capture sender
+    $("btnSend").addEventListener("click", async ()=>{
+      const email = $("leadEmail").value.trim();
+      const msg = $("sendMsg");
+      msg.style.color = "var(--muted)";
+      if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){
+        msg.style.color = "var(--danger)";
+        msg.textContent = "Please enter a valid email address.";
+        return;
+      }
+
+      const data = {
+        email,
+        source: "Pricing Calculator",
+        ...JSON.parse($("leadBlock").dataset.payload || "{}")
+      };
+
+      if (EMAIL_WEBHOOK_URL) {
+        try {
+          const res = await fetch(EMAIL_WEBHOOK_URL, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(data)
+          });
+          if (!res.ok) throw new Error("Network response was not ok");
+          msg.style.color = "var(--success)";
+          msg.textContent = "Thanks! We’ve emailed your estimate and will follow up with volume pricing shortly.";
+          $("btnSend").disabled = true;
+        } catch (e) {
+          msg.style.color = "var(--danger)";
+          msg.textContent = "Hmm, couldn’t send just now. Please try again, or contact us at sales@modlappe.com.";
+        }
+      } else {
+        console.log("Lead payload (configure EMAIL_WEBHOOK_URL to send):", data);
+        msg.style.color = "var(--success)";
+        msg.textContent = "Saved! (Demo mode) We’ll email your estimate & volume pricing soon.";
+        $("btnSend").disabled = true;
+      }
+    });
+
+    // Initialize button state
+    validatePeople();
+  })();
+  </script>
+</body>
+</html>
