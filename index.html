@@ -246,14 +246,13 @@
           </table>
         </div>
 
-        <!-- Lead capture -->
-        <div id="leadBlock" class="dashed" style="margin-top:16px;">
-          <label class="row">
-            <span style="font-weight:600;">Email me this estimate &amp; Modla’s volume-based pricing</span>
-            <input id="leadEmail" type="email" autocomplete="email" placeholder="you@company.com" style="flex:1;min-width:220px;">
-            <button id="btnSend">Send</button>
-          </label>
-          <small id="sendMsg" style="display:block;margin-top:8px;"></small>
+        <!-- Book demo -->
+        <div id="leadBlock" class="dashed" style="margin-top:16px; text-align:center;">
+          <p style="font-weight:600; margin-bottom:10px;">Click below to book a demo with our team</p>
+          <a href="https://your-booking-page-url.com" target="_blank" 
+             style="display:inline-block; background:var(--brand-blue); color:#fff; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:500;">
+            Book a Demo
+          </a>
         </div>
       </div>
     </div>
@@ -261,8 +260,6 @@
 
   <script>
   (function(){
-    const EMAIL_WEBHOOK_URL = ""; // optional webhook endpoint
-
     const $ = id => document.getElementById(id);
     const fmt0 = n => n.toLocaleString(undefined,{maximumFractionDigits:0});
     const money = n => n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -364,65 +361,7 @@
         $("winBanner").style.display = "none";
       }
 
-      const payload = {
-        people,
-        months: +$("inpMonths").value,
-        working_days: daysForPeriod,
-        prices: {
-          disposable_unit: pDisp,
-          modla_mask: pModlaMask,
-          modla_filter: pModlaFilter
-        },
-        totals: {
-          disposable_total: +dispTotal.toFixed(2),
-          modla_total: +modlaTotal.toFixed(2),
-          savings_abs: +savingsAbs.toFixed(2),
-          savings_pct: +savingsPct.toFixed(1)
-        },
-        timestamp: new Date().toISOString()
-      };
-      $("leadBlock").dataset.payload = JSON.stringify(payload);
-
       $("results").classList.remove("hidden");
-    });
-
-    $("btnSend").addEventListener("click", async ()=>{
-      const email = $("leadEmail").value.trim();
-      const msg = $("sendMsg");
-      msg.style.color = "var(--muted)";
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-        msg.style.color = "var(--danger)";
-        msg.textContent = "Please enter a valid email address.";
-        return;
-      }
-
-      const data = {
-        email,
-        source: "Pricing Calculator",
-        ...JSON.parse($("leadBlock").dataset.payload || "{}")
-      };
-
-      if (EMAIL_WEBHOOK_URL) {
-        try {
-          const res = await fetch(EMAIL_WEBHOOK_URL, {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify(data)
-          });
-          if (!res.ok) throw new Error("Network response was not ok");
-          msg.style.color = "var(--success)";
-          msg.textContent = "Thanks! We’ve emailed your estimate and will follow up with volume pricing shortly.";
-          $("btnSend").disabled = true;
-        } catch (e) {
-          msg.style.color = "var(--danger)";
-          msg.textContent = "Hmm, couldn’t send just now. Please try again, or contact us at sales@modlappe.com.";
-        }
-      } else {
-        console.log("Lead payload (configure EMAIL_WEBHOOK_URL to send):", data);
-        msg.style.color = "var(--success)";
-        msg.textContent = "Saved! (Demo mode) We’ll email your estimate & volume pricing soon.";
-        $("btnSend").disabled = true;
-      }
     });
 
     validatePeople();
